@@ -29,10 +29,34 @@
 # 
 # Ie, if your house/business/whatever burns down, don't blame me.
 #
+
+PID=$$
+REGEXFILE=/tmp/${PID}.regex
+rm -f ${REGEXFILE} 2>/dev/null
+
+# No params... just exit
+if [ $# -lt 1 ]; then
+  exit 0
+fi
 cidr=$1
-shift
-IPRANGE=`nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
-  egrep "scan report" | awk '{print $NF}' | \
-  sed -e 's/[ ][ ]*//g' -e 's/^/[!1-90]\*/' -e 's/$/[!1-90]\*/'  | tr '\012' '|' | \
-  sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g'` 
-egrep "${IPRANGE}" $*
+
+
+if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[/][1-90][1-90]*$ ]]; then
+  shift
+  nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
+    egrep "scan report" | awk '{print $NF}' | \
+    sed -e 's/[ ][ ]*//g' -e 's/^/[^1-90]\*/' -e 's/$/[^1-90]\*/'  | tr '\012' '|' | \
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' > ${REGEXFILE}
+else
+  if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*$ ]]; then
+    shift
+    echo "[^1-90]*${cidr}[^1-90]*" > ${REGEXFILE}
+  fi
+fi
+if [ -f ${REGEXFILE} ]; then
+  egrep -f ${REGEXFILE} $*
+  rm -f ${REGEXFILE}
+else
+  egrep $*
+fi
+
