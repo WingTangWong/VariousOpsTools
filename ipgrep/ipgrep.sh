@@ -70,8 +70,8 @@ fi
 
 if [ -f ${REGEXFILE} ]; then
   egrep -f ${REGEXFILE} $* | egrep -v -f ${NEGREGEXFILE}
-#  rm -f ${REGEXFILE}
-#  rm -f ${NEGREGEXFILE}
+  rm -f ${REGEXFILE}
+  rm -f ${NEGREGEXFILE}
 else
   egrep $*
 fi
