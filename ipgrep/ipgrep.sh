@@ -32,6 +32,7 @@
 
 PID=$$
 REGEXFILE=/tmp/${PID}.regex
+NEGREGEXFILE=/tmp/${PID}.negregex
 rm -f ${REGEXFILE} 2>/dev/null
 
 # No params... just exit
@@ -45,17 +46,32 @@ if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[/]
   shift
   nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
     egrep "scan report" | awk '{print $NF}' | \
-    sed -e 's/[ ][ ]*//g' -e 's/^/[^1-90]\*/' -e 's/$/[^1-90]\*/'  | tr '\012' '|' | \
+    sed -e 's/[ ][ ]*//g' | tr '\012' '|' | \
     sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' > ${REGEXFILE}
+
+  nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
+    egrep "scan report" | awk '{print $NF}' | \
+    sed -e 's/[ ][ ]*//g' -e 's/^/[1-90]/' | tr '\012' '|' | \
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' > ${NEGREGEXFILE}
+
+  nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
+    egrep "scan report" | awk '{print $NF}' | \
+    sed -e 's/[ ][ ]*//g' -e 's/$/[1-90]/'  | tr '\012' '|' | \
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' >> ${NEGREGEXFILE}
+
 else
   if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*$ ]]; then
     shift
-    echo "[^1-90]*${cidr}[^1-90]*" > ${REGEXFILE}
+    echo "${cidr}" > ${REGEXFILE}
+    echo "[1-90]${cidr}" > ${NEGREGEXFILE}
+    echo "${cidr}[1-90]" > ${NEGREGEXFILE}
   fi
 fi
+
 if [ -f ${REGEXFILE} ]; then
-  egrep -f ${REGEXFILE} $*
-  rm -f ${REGEXFILE}
+  egrep -f ${REGEXFILE} $* | egrep -v -f ${NEGREGEXFILE}
+#  rm -f ${REGEXFILE}
+#  rm -f ${NEGREGEXFILE}
 else
   egrep $*
 fi
