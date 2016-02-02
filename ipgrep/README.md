@@ -3,7 +3,7 @@ Various Operations/Engineering Tools I find Useful
 
 # Description: 
 
-A friend of mine (Chris Haynie) posited an idea: igrep, which allows
+A friend of mine, [Chris Haynie](https://github.com/saxophonicle) posited an idea: igrep, which allows
 you to grep ip addresses and cidr(S) against a file. After sketching out
 some ideas, wrote up this bash shell wrapper that pre-processes the first
 parameter as a potential cidr to be expanded into an egrep regex.
