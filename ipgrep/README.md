@@ -29,7 +29,3 @@ it for personal, production, or any kind of usage, I take no
 responsibility for what may or may not happen in your environment/box/etc.
 
 Ie, if your house/business/whatever burns down, don't blame me.
-
-# Errata
-
-- single digit trailing ip addresses like 10.0.0.4 ends up matching more than expected. 
