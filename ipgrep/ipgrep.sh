@@ -47,24 +47,24 @@ if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[/]
   nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
     egrep "scan report" | awk '{print $NF}' | \
     sed -e 's/[ ][ ]*//g' | tr '\012' '|' | \
-    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' > ${REGEXFILE}
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' -e 's/[.]/\[.\]/g' > ${REGEXFILE}
 
   nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
     egrep "scan report" | awk '{print $NF}' | \
     sed -e 's/[ ][ ]*//g' -e 's/^/[1-90]/' | tr '\012' '|' | \
-    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' > ${NEGREGEXFILE}
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' -e 's/[.]/\[.\]/g' > ${NEGREGEXFILE}
 
   nmap -sL ${cidr} -sn -Pn --disable-arp-ping -n  2>/dev/null | \
     egrep "scan report" | awk '{print $NF}' | \
     sed -e 's/[ ][ ]*//g' -e 's/$/[1-90]/'  | tr '\012' '|' | \
-    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' >> ${NEGREGEXFILE}
+    sed -e 's/^[|]//' -e 's/[|]$//' -e 's/[|][|]*/|/g' -e 's/[.]/\[.\]/g' >> ${NEGREGEXFILE}
 
 else
   if [[ $cidr =~ ^[1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*[.][1-90][1-90]*$ ]]; then
     shift
-    echo "${cidr}" > ${REGEXFILE}
-    echo "[1-90]${cidr}" > ${NEGREGEXFILE}
-    echo "${cidr}[1-90]" > ${NEGREGEXFILE}
+    echo "${cidr}"       | sed -e 's/[.]/\[.\]/g' > ${REGEXFILE}
+    echo "[1-90]${cidr}" | sed -e 's/[.]/\[.\]/g' > ${NEGREGEXFILE}
+    echo "${cidr}[1-90]" | sed -e 's/[.]/\[.\]/g' >> ${NEGREGEXFILE}
   fi
 fi
 
